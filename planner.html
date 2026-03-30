@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Growth Planner - InsightStream AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .bg-navy-950 { background-color: #020617; }
+        .glass-card { 
+            background: rgba(15, 23, 42, 0.6); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(12px);
+        }
+        .nav-active {
+            background-color: rgba(79, 70, 229, 0.1);
+            border-left: 4px solid #6366f1;
+            color: #ffffff !important;
+        }
+        input[type="range"] { accent-color: #6366f1; }
+    </style>
+</head>
+
+<body class="bg-navy-950 text-slate-200">
+
+    <div class="flex h-screen overflow-hidden">
+        <aside class="w-64 bg-slate-950 border-r border-white/5 hidden md:flex flex-col">
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-10">
+                    <div class="h-8 w-8 bg-indigo-600 rounded-lg flex items-center justify-center shadow-lg shadow-indigo-500/20">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <span class="text-lg font-bold tracking-tight text-white">InsightStream</span>
+                </div>
+
+                <nav class="space-y-1">
+                    <a href="{{ url_for('dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-r-lg transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                        <span class="font-medium text-sm">Dashboard</span>
+                    </a>
+                    <a href="{{ url_for('transactions') }}" class="flex items-center gap-3 px-4 py-3 rounded-r-lg transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        <span class="font-medium text-sm">Audit Log</span>
+                    </a>
+                    <a href="{{ url_for('planner') }}" class="flex items-center gap-3 px-4 py-3 rounded-r-lg transition-all nav-active">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span class="font-medium text-sm">Growth Planner</span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="mt-auto p-6 border-t border-white/5 bg-slate-900/50">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center font-bold text-white shadow-lg">
+                        {{ current_user.business_name[0] }}
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold text-white truncate w-24">{{ current_user.business_name }}</span>
+                        <span class="text-[10px] text-emerald-400 font-medium">Active</span>
+                    </div>
+                    </div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto p-8 lg:p-12">
+            <header class="mb-12">
+                <h2 class="text-3xl font-extrabold text-white tracking-tight">Strategy Lab</h2>
+                <p class="text-slate-400 mt-1">Simulating revenue growth based on marketing budget allocation</p>
+            </header>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-1 space-y-6">
+                    <div class="glass-card p-8 rounded-3xl">
+                        <h4 class="text-lg font-bold text-white mb-8 flex items-center gap-2">
+                            <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                            Model Parameters
+                        </h4>
+                        
+                        <div class="space-y-10">
+                            <div>
+                                <div class="flex justify-between mb-4">
+                                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Monthly Ad Spend</label>
+                                    <span id="spendDisplay" class="text-xs font-bold text-indigo-400">$10,000</span>
+                                </div>
+                                <input type="range" id="spendSlider" min="500" max="50000" step="500" value="10000" 
+                                    class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                            </div>
+
+                            <div>
+                                <div class="flex justify-between mb-4">
+                                    <label class="text-[10px] font-black text-slate-500 uppercase tracking-widest">Optimization Multiplier</label>
+                                    <span id="multDisplay" class="text-xs font-bold text-emerald-400">1.0x</span>
+                                </div>
+                                <input type="range" id="multSlider" min="0.5" max="2.0" step="0.1" value="1.0" 
+                                    class="w-full h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer">
+                            </div>
+
+                            <button onclick="runSimulation()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-indigo-600/20 text-xs uppercase tracking-widest">
+                                Generate Forecast
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="bg-indigo-500/10 border border-indigo-500/20 p-8 rounded-3xl">
+                        <p class="text-[10px] font-bold text-indigo-400 uppercase tracking-widest mb-4">Predicted Model Efficiency</p>
+                        <div class="flex items-end gap-2">
+                            <span id="roiValue" class="text-4xl font-black text-white">0%</span>
+                            <span class="text-sm text-slate-500 mb-1">Expected ROI</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-2 glass-card p-8 rounded-3xl">
+                    <div class="flex justify-between items-center mb-10">
+                        <h4 class="text-lg font-bold text-white">6-Month Projection</h4>
+                        <div class="flex items-center gap-2">
+                            <span class="w-3 h-3 rounded-full bg-indigo-500"></span>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">ML Prediction</span>
+                        </div>
+                    </div>
+                    <div class="h-[480px]">
+                        <canvas id="forecastChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        let forecastChart;
+        document.getElementById('spendSlider').oninput = function() {
+            document.getElementById('spendDisplay').innerText = '$' + parseInt(this.value).toLocaleString();
+        };
+        document.getElementById('multSlider').oninput = function() {
+            document.getElementById('multDisplay').innerText = parseFloat(this.value).toFixed(1) + 'x';
+        };
+
+        async function runSimulation() {
+            const budget = document.getElementById('spendSlider').value;
+            const multiplier = document.getElementById('multSlider').value;
+
+            const response = await fetch('/api/simulate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ budget, multiplier })
+            });
+
+            const data = await response.json();
+
+            if (data.forecast) {
+                const roi = (((data.forecast - budget) / budget) * 100).toFixed(0);
+                document.getElementById('roiValue').innerText = roi + '%';
+
+                // Line Chart
+                forecastChart.data.datasets[0].data = data.trajectory; // Growth
+                forecastChart.data.datasets[1].data = data.baseline;   // Historical Baseline
+                forecastChart.update();
+            }
+        }
+
+        function updateChart(data) {
+            forecastChart.data.labels = data.labels;
+            forecastChart.data.datasets[0].data = data.predicted;
+            forecastChart.data.datasets[1].data = data.baseline;
+            forecastChart.update();
+        }
+
+        function initChart() {
+            const ctx = document.getElementById('forecastChart').getContext('2d');
+            
+            const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(99, 102, 241, 0.3)');
+            gradient.addColorStop(1, 'rgba(99, 102, 241, 0)');
+
+            forecastChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['Month 1', 'Month 2', 'Month 3', 'Month 4', 'Month 5', 'Month 6'],
+                    datasets: [
+                        {
+                            label: 'Predicted Growth',
+                            data: [0, 0, 0, 0, 0, 0],
+                            borderColor: '#818cf8',
+                            borderWidth: 4,
+                            fill: true,
+                            backgroundColor: gradient,
+                            tension: 0.4,
+                            pointRadius: 6,
+                            pointBackgroundColor: '#818cf8'
+                        },
+                        {
+                            label: 'Baseline (Historical)',
+                            data: [0, 0, 0, 0, 0, 0],
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderDash: [5, 5],
+                            borderWidth: 2,
+                            fill: false,
+                            pointRadius: 0
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { 
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { 
+                                color: '#64748b',
+                                callback: (value) => '$' + (value >= 1000 ? (value/1000).toFixed(0) + 'k' : value)
+                            }
+                        },
+                        x: { grid: { display: false }, ticks: { color: '#64748b' } }
+                    }
+                }
+            });
+            
+            runSimulation();
+        }
+
+        window.onload = initChart;
+    </script>
+</body>
+</html>

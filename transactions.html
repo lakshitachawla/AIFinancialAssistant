@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Log - InsightStream AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .bg-navy-950 { background-color: #020617; }
+        .glass-card { 
+            background: rgba(15, 23, 42, 0.6); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+            backdrop-filter: blur(12px);
+        }
+        .nav-active {
+            background-color: rgba(79, 70, 229, 0.1);
+            border-left: 4px solid #6366f1;
+            color: #ffffff !important;
+        }
+        /* Table header styling */
+        thead th {
+            background: rgba(30, 41, 59, 0.8);
+            color: #94a3b8;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 10px;
+            font-weight: 800;
+        }
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .badge-verified { background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); }
+        .badge-anomaly { background: rgba(244, 63, 94, 0.1); color: #f43f5e; border: 1px solid rgba(244, 63, 94, 0.2); }
+
+        /* Scrollable table container */
+        .table-container {
+            overflow-x: auto; /* horizontal scroll */
+            overflow-y: auto; /* vertical scroll */
+            max-height: 600px; /* adjust as needed */
+        }
+
+        /* Optional: sticky header */
+        .table-container table thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+    </style>
+</head>
+
+<body class="bg-navy-950 text-slate-200">
+
+    <div class="flex h-screen overflow-hidden">
+        <aside class="w-64 bg-slate-950 border-r border-white/5 hidden md:flex flex-col">
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-10">
+                    <div class="h-8 w-8 bg-indigo-600 rounded-lg flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                    </div>
+                    <span class="text-lg font-bold text-white">InsightStream</span>
+                </div>
+
+                <nav class="space-y-1">
+                    <a href="{{ url_for('dashboard') }}" class="flex items-center gap-3 px-4 py-3 rounded-r-lg transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                        <span class="font-medium text-sm">Dashboard</span>
+                    </a>
+                    <a href="{{ url_for('transactions') }}" class="flex items-center gap-3 px-4 py-3 rounded-r-lg transition-all nav-active">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        <span class="font-medium text-sm">Audit Log</span>
+                    </a>
+                    <a href="{{ url_for('planner') }}" class="flex items-center gap-3 px-4 py-3 rounded-r-lg transition-all text-slate-400 hover:text-white hover:bg-white/5">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        <span class="font-medium text-sm">Growth Planner</span>
+                    </a>
+                </nav>
+            </div>
+
+            <div class="mt-auto p-6 border-t border-white/5">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center font-bold text-white shadow-lg">
+                        {{ current_user.business_name[0] }}
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-sm font-bold text-white truncate w-24">{{ current_user.business_name }}</span>
+                        <span class="text-[10px] text-emerald-400 font-medium">Active</span>
+                    </div>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto p-8 lg:p-12">
+            <header class="flex justify-between items-center mb-10">
+                <div>
+                    <h2 class="text-3xl font-extrabold text-white tracking-tight">Audit Log</h2>
+                    <p class="text-slate-400 mt-1">Reviewing verified and flagged records</p>
+                </div>
+                
+                <div class="relative">
+                    <input id="searchInput" type="text" placeholder="Search transactions..." 
+                        class="bg-slate-900 border border-white/10 rounded-xl px-5 py-2.5 text-sm text-white w-64 focus:border-indigo-500 outline-none transition-all">
+                    <svg class="w-4 h-4 text-slate-500 absolute right-4 top-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                </div>
+            </header>
+
+<div class="glass-card rounded-2xl overflow-hidden shadow-2xl">
+    <div class="table-container">
+        <table class="w-full text-left border-collapse min-w-[800px]">
+            <thead>
+                <tr>
+                    <th class="px-8 py-5">Date</th>
+                    <th class="px-8 py-5">Description</th>
+                    <th class="px-8 py-5">Category</th>
+                    <th class="px-8 py-5">Type</th>
+                    <th class="px-8 py-5">Amount</th>
+                    <th class="px-8 py-5">Audit Status</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-white/5">
+                {% for t in transactions %}
+                <tr class="hover:bg-white/[0.02] transition-colors">
+                    <td class="px-8 py-6 text-sm text-slate-400">{{ t.transaction_date }}</td>
+                    <td class="px-8 py-6 text-sm font-bold text-white uppercase">{{ t.description }}</td>
+                    <td class="px-8 py-6">
+                        <span class="text-[10px] font-black tracking-widest bg-slate-800 text-slate-300 px-3 py-1.5 rounded uppercase">
+                            {{ t.category }}
+                        </span>
+                    </td>
+                    <td class="px-8 py-6">
+                        {% if 'Sale' in t.category or 'Revenue' in t.category %}
+                        <div class="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-tighter">
+                            Credit
+                        </div>
+                        {% else %}
+                        <div class="flex items-center gap-2 text-rose-500 font-bold text-xs uppercase tracking-tighter">
+                            Debit
+                        </div>
+                        {% endif %}
+                    </td>
+                    <td class="px-8 py-6 text-lg font-black text-white">
+                        ${{ "{:,.2f}".format(t.amount) }}
+                    </td>
+                    <td class="px-8 py-6">
+                        {% if t.is_anomaly %}
+                        <span class="status-badge badge-anomaly flex items-center gap-2 w-fit">
+                            Anomaly
+                        </span>
+                        {% else %}
+                        <span class="status-badge badge-verified flex items-center gap-2 w-fit">
+                            Verified
+                        </span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+
+<script>
+  const searchInput = document.getElementById('searchInput');
+  searchInput.addEventListener('input', function() {
+      const filter = this.value.toLowerCase();
+      const table = document.querySelector('.table-container table tbody');
+      const rows = table.getElementsByTagName('tr');
+
+      for (let i = 0; i < rows.length; i++) {
+          const rowText = rows[i].textContent.toLowerCase();
+          rows[i].style.display = rowText.includes(filter) ? '' : 'none';
+      }
+  });
+</script>
+
+</html>
